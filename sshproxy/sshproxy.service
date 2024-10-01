@@ -1,0 +1,12 @@
+[Unit]
+Description=SOCKS5 Proxy Server
+After=network.target
+
+[Service]
+User=sshproxy
+Type=simple
+ExecStart=ssh -o StrictHostKeyChecking=no -N -D 0.0.0.0:18080 localhost
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+# sshproxy installation playbook
+---
+- hosts: "proxy"
+  tasks:
+    - name: "Create sshproxy user"
+      ansible.builtin.user:
+        name: sshproxy
+        comment: User for ssh proxy
+        shell: /usr/bin/bash
+        create_home: yes
+        generate_ssh_key: yes
+        ssh_key_file: .ssh/id_rsa
+
+    - name: "Add public ssh key to server"
+      ansible.builtin.copy:
+        src: /home/sshproxy/.ssh/id_rsa.pub
+        dest: /home/sshproxy/.ssh/authorized_keys
+        remote_src: yes
+
+    - name: "Copy sshproxy.service"
+      ansible.builtin.copy:
+        src: sshproxy.service
+        dest: /etc/systemd/system/sshproxy.service
+        owner: sshproxy
+        group: sshproxy
+        mode: u=rwx,g=rwx,o=r
+
+    - name: "Enable sshproxy.service"
+      ansible.builtin.systemd_service:
+        name: sshproxy
+        daemon_reload: true
+        enabled: true
+
+    - name: "Start sshproxy.service"
+      ansible.builtin.systemd_service:
+        name: sshproxy
+        state: started
